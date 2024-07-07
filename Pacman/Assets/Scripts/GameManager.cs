@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public GameObject Cell;
+    public GameGrid grid;
+
     void Start()
     {
-        
+        grid = new GameGrid(Cell);
+        grid.DrawGrid();
+        grid.UpdateGridColour();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
     }
 }
