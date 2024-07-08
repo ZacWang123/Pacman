@@ -12,7 +12,7 @@ public class GameGrid
     public GameGrid(GameObject cell)
     {   
         Grid = new int[28,31] {
-            { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            { 1 , 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             { 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
             { 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1},
             { 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1},
@@ -71,7 +71,6 @@ public class GameGrid
                     case 0:
                         Cell.material.color = new Color(0, 0, 0);
                         break;
-
                     case 1:
                         Cell.material.color = new Color(0, 0, 139);
                         break;
@@ -80,6 +79,18 @@ public class GameGrid
                         break;
                     case 3:
                         Cell.material.color = new Color(255, 255, 0);
+                        break;
+                    case 4:
+                        Cell.material.color = new Color(139, 0, 0);
+                        break;
+                    case 5:
+                        Cell.material.color = new Color(0, 255, 255);
+                        break;
+                    case 6:
+                        Cell.material.color = new Color32(232, 0, 254, 255);
+                        break;
+                    case 7:
+                        Cell.material.color = new Color32(254, 161, 0, 255);
                         break;
                 }
             }
@@ -94,14 +105,5 @@ public class GameGrid
     public void UpdateGrid(int row, int col, int value)
     {
         Grid[row, col] = value;
-    }
-
-    public bool WithinGrid(int row, int col)
-    {
-        if (row >= 0 && row < Rows && col >= 0 && col < Columns)
-        {
-            return true;
-        }
-        return false;
     }
 }
