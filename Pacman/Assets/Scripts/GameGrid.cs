@@ -78,12 +78,15 @@ public class GameGrid
                     case 2:
                         Cell.material.color = new Color(255, 192, 203);
                         break;
+                    case 3:
+                        Cell.material.color = new Color(255, 255, 0);
+                        break;
                 }
             }
         }
     }
 
-/*    public int GetGridCell(int row, int col)
+    public int GetGridCell(int row, int col)
     {
         return Grid[row, col];
     }
@@ -100,5 +103,5 @@ public class GameGrid
             return true;
         }
         return false;
-    }*/
+    }
 }
