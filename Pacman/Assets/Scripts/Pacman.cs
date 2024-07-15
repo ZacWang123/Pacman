@@ -6,6 +6,8 @@ using UnityEngine;
 public class Pacman
 {
     public Positions pacmanPosition;
+    public string Direction;
+
     public int Id {
         get;
     }
