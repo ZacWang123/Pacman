@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class GameManager : MonoBehaviour
     public GameObject Cell;
     public GameGrid grid;
     public Pacman pacman;
+    public Ghost[] ghosts;
     public Ghost1 ghost1;
     public Ghost2 ghost2;   
     public Ghost3 ghost3;
@@ -21,11 +23,14 @@ public class GameManager : MonoBehaviour
         ghost2 = new Ghost2();
         ghost3 = new Ghost3();
         ghost4 = new Ghost4();
+        ghosts = new Ghost[] { ghost1, ghost2, ghost3, ghost4 };
 
         UpdatePacmanPosition(13,7);
-        UpdateGhostPositions();
+        SpawnGhosts();
         grid.DrawGrid();
         grid.UpdateGridColour();
+
+        StartGamePhases();
     }
 
     public void UpdatePacmanPosition(int oldRow, int oldCol) {
@@ -74,12 +79,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void UpdateGhostPositions() {
-        grid.UpdateGrid(ghost1.ghostPosition.Row, ghost1.ghostPosition.Col, ghost1.Id);
-        grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
-        grid.UpdateGrid(ghost3.ghostPosition.Row, ghost3.ghostPosition.Col, ghost3.Id);
-        grid.UpdateGrid(ghost4.ghostPosition.Row, ghost4.ghostPosition.Col, ghost4.Id);
+    public void SpawnGhosts() {
+        for (int i = 0; i < ghosts.Length; i++) {
+            grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
+        }
     }
+    public void StartGamePhases() {
+        StartCoroutine(GameLoop());
+    }
+
+    IEnumerator GameLoop() {
+        string[] phases = new string[8] { "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase", };
+        int[] duration = new int[8] { 7, 20, 7, 20, 5, 20, 5, 999 };
+
+        for (int i = 0; i < 8; i++)
+        {
+            print(phases[i]);
+            yield return new WaitForSeconds(duration[i]);
+        }
+    }
+
     void Update()
     {
         PacmanMovement();
