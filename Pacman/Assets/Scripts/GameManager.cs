@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -117,7 +119,13 @@ public class GameManager : MonoBehaviour
 
     public void GhostMovement()
     {
-        Positions[] nextGhostMove = ghost2.NextPosition(pacman.pacmanPosition);
+        Dictionary<string, Positions> neighbors = NeighboringCells(ghost2.ghostPosition, ghost2.direction);
+        Positions bestNeighbor = BestNeighbor(neighbors);
+        grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
+        ghost2.ghostPosition.Row = bestNeighbor.Row;
+        ghost2.ghostPosition.Col = bestNeighbor.Col;
+        grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
+        /*Positions[] nextGhostMove = ghost2.NextPosition(pacman.pacmanPosition);
 
         for (int i = 0; i < nextGhostMove.Length; i++)
         {
@@ -128,7 +136,52 @@ public class GameManager : MonoBehaviour
                 grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
                 break;
             }
+        }*/
+    }
+
+    public Positions BestNeighbor(Dictionary<string, Positions> neighbors) {
+        Positions bestNeighbor = new Positions(0, 0);
+        double distance = 100000.0;
+        string direction = "";
+
+        foreach (KeyValuePair<string, Positions> keyValue in neighbors) {
+            double newDistance = Math.Sqrt(Math.Pow(keyValue.Value.Row - pacman.pacmanPosition.Row, 2) + Math.Pow(keyValue.Value.Col - pacman.pacmanPosition.Col, 2));
+            if (newDistance < distance) {
+                distance = newDistance;
+                bestNeighbor.Row = keyValue.Value.Row;
+                bestNeighbor.Col = keyValue.Value.Col;
+                direction = keyValue.Key;
+            }
         }
+        ghost2.direction = direction;
+        return bestNeighbor;
+    }
+
+    public Dictionary<string, Positions> NeighboringCells(Positions currentCell, string direction)
+    {
+        Dictionary<string, Positions> neighbors = new Dictionary<string, Positions>();
+        if (direction != "up") {
+            if (grid.WithinGrid(currentCell.Row, currentCell.Col - 1) && grid.GetGridCell(currentCell.Row, currentCell.Col - 1) != 1) {
+                neighbors.Add("down", new Positions(currentCell.Row, currentCell.Col - 1));
+            }
+        }
+        if (direction != "down") {
+            if (grid.WithinGrid(currentCell.Row, currentCell.Col + 1) && grid.GetGridCell(currentCell.Row, currentCell.Col + 1) != 1) {
+                    neighbors.Add("up", new Positions(currentCell.Row, currentCell.Col + 1));
+            }
+        }
+        if (direction != "left") {
+            if (grid.WithinGrid(currentCell.Row + 1, currentCell.Col) && grid.GetGridCell(currentCell.Row + 1, currentCell.Col) != 1) {
+                neighbors.Add("right", new Positions(currentCell.Row + 1, currentCell.Col));
+            }
+        }
+        if (direction != "right") {
+            if (grid.WithinGrid(currentCell.Row - 1, currentCell.Col) && grid.GetGridCell(currentCell.Row - 1, currentCell.Col) != 1) {
+                neighbors.Add("left", new Positions(currentCell.Row - 1, currentCell.Col));
+            }
+        }
+
+        return neighbors;
     }
 
     void Update()
