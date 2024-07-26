@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class Ghost2 : Ghost
 {
-    public Positions[] scatterPos;
     public Ghost2()
     {
         ghostPosition = new Positions(11, 16);

@@ -17,10 +17,10 @@ public class GameManager : MonoBehaviour
     public Ghost3 ghost3;
     public Ghost4 ghost4;
     public float time;
-    public float updateInterval = 0.1f;
+    public float updateInterval = 1f;
 
     string[] phases = new string[8] { "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase"};
-    int[] phaseDuration = new int[8] { 7, 20, 7, 20, 5, 20, 5, 999};
+    int[] phaseDuration = new int[8] { 100, 20, 7, 20, 5, 20, 5, 999};
     string currentPhase = "";
 
 /*    int[] ghostSpawnTime = new int[4] { 1, 1000, 1000, 1000};*/
@@ -122,46 +122,107 @@ public class GameManager : MonoBehaviour
 
     public void GhostMovement()
     {
-        if (currentPhase == "Scatter") {
-            int scatterLength = ghost2.scatterPos.Length;
-            for (int i = 0; i < scatterLength; i++) {
-                if (ghost2.ghostPosition.Row == ghost2.scatterPos[i].Row && ghost2.ghostPosition.Col == ghost2.scatterPos[i].Col) {
-                    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
-                    ghost2.ghostPosition.Row = ghost2.scatterPos[(i + 1) % scatterLength].Row;
-                    ghost2.ghostPosition.Col = ghost2.scatterPos[(i + 1) % scatterLength].Col;
-                    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
-                    return;
+        for (int i = 0; i < 2; i++)
+        {
+            if (currentPhase == "Scatter")
+            {
+                int scatterLength = ghosts[i].scatterPos.Length;
+                for (int j = 0; j < scatterLength; j++)
+                {
+                    if (ghosts[i].ghostPosition.Row == ghosts[i].scatterPos[j].Row && ghosts[i].ghostPosition.Col == ghosts[i].scatterPos[j].Col)
+                    {
+                        grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, 0);
+                        ghosts[i].ghostPosition.Row = ghosts[i].scatterPos[(j + 1) % scatterLength].Row;
+                        ghosts[i].ghostPosition.Col = ghosts[i].scatterPos[(j + 1) % scatterLength].Col;
+                        grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
+                        return;
+                    }
                 }
             }
+
+            Dictionary<string, Positions> neighbors = NeighboringCells(ghosts[i].ghostPosition, ghosts[i].direction);
+            Positions bestNeighbor = BestNeighbor(neighbors, i);
+            grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, 0);
+            ghosts[i].ghostPosition.Row = bestNeighbor.Row;
+            ghosts[i].ghostPosition.Col = bestNeighbor.Col;
+            grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
         }
-
-        Dictionary<string, Positions> neighbors = NeighboringCells(ghost2.ghostPosition, ghost2.direction);
-        Positions bestNeighbor = BestNeighbor(neighbors);
-        grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
-        ghost2.ghostPosition.Row = bestNeighbor.Row;
-        ghost2.ghostPosition.Col = bestNeighbor.Col;
-        grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
     }
-
-    public Positions BestNeighbor(Dictionary<string, Positions> neighbors) {
+    public Positions BestNeighbor(Dictionary<string, Positions> neighbors, int ghostNum)
+    {
         Positions bestNeighbor = new Positions(0, 0);
         double distance = 100000.0;
         string direction = "";
 
-        foreach (KeyValuePair<string, Positions> keyValue in neighbors) {
+        foreach (KeyValuePair<string, Positions> keyValue in neighbors)
+        {
+            Positions target = new Positions(0, 0);
+            if (currentPhase == "Scatter")
+            {
+                target.Row = ghosts[ghostNum].scatterTarget.Row;
+                target.Col = ghosts[ghostNum].scatterTarget.Col;
+            }
+            else if (currentPhase == "Chase")
+            {
+                target.Row = pacman.pacmanPosition.Row;
+                target.Col = pacman.pacmanPosition.Col;
+            }
+            double newDistance = Math.Sqrt(Math.Pow(keyValue.Value.Row - target.Row, 2) + Math.Pow(keyValue.Value.Col - target.Col, 2));
+
+            if (newDistance < distance)
+            {
+                distance = newDistance;
+                bestNeighbor.Row = keyValue.Value.Row;
+                bestNeighbor.Col = keyValue.Value.Col;
+                direction = keyValue.Key;
+            }
+        }
+        ghosts[ghostNum].direction = direction;
+        return bestNeighbor;
+    }
+
+    /*if (currentPhase == "Scatter") {
+        int scatterLength = ghost2.scatterPos.Length;
+        for (int i = 0; i < scatterLength; i++) {
+            if (ghost2.ghostPosition.Row == ghost2.scatterPos[i].Row && ghost2.ghostPosition.Col == ghost2.scatterPos[i].Col) {
+                grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
+                ghost2.ghostPosition.Row = ghost2.scatterPos[(i + 1) % scatterLength].Row;
+                ghost2.ghostPosition.Col = ghost2.scatterPos[(i + 1) % scatterLength].Col;
+                grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
+                return;
+            }
+        }
+    }
+
+    Dictionary<string, Positions> neighbors = NeighboringCells(ghost2.ghostPosition, ghost2.direction);
+    Positions bestNeighbor = BestNeighbor(neighbors);
+    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
+    ghost2.ghostPosition.Row = bestNeighbor.Row;
+    ghost2.ghostPosition.Col = bestNeighbor.Col;
+    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);*/
+    /*public Positions BestNeighbor(Dictionary<string, Positions> neighbors, int ghostNum)
+    {
+        Positions bestNeighbor = new Positions(0, 0);
+        double distance = 100000.0;
+        string direction = "";
+
+        foreach (KeyValuePair<string, Positions> keyValue in neighbors)
+        {
             Positions target = new Positions(0, 0);
             if (currentPhase == "Scatter")
             {
                 target.Row = ghost2.scatterTarget.Row;
                 target.Col = ghost2.scatterTarget.Col;
             }
-            else if (currentPhase == "Chase") {
+            else if (currentPhase == "Chase")
+            {
                 target.Row = pacman.pacmanPosition.Row;
                 target.Col = pacman.pacmanPosition.Col;
             }
             double newDistance = Math.Sqrt(Math.Pow(keyValue.Value.Row - target.Row, 2) + Math.Pow(keyValue.Value.Col - target.Col, 2));
 
-            if (newDistance < distance) {
+            if (newDistance < distance)
+            {
                 distance = newDistance;
                 bestNeighbor.Row = keyValue.Value.Row;
                 bestNeighbor.Col = keyValue.Value.Col;
@@ -170,7 +231,7 @@ public class GameManager : MonoBehaviour
         }
         ghost2.direction = direction;
         return bestNeighbor;
-    }
+    }*/
 
     public Dictionary<string, Positions> NeighboringCells(Positions currentCell, string direction)
     {

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public abstract class Ghost
 {
+    public Positions[] scatterPos;
     public Positions ghostPosition;
     public int Id;
     public string mode;
