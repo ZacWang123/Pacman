@@ -11,6 +11,8 @@ public class Ghost2 : Ghost
         ghostPosition = new Positions(11, 16);
         Id = 5;
         direction = "up";
+        exited = false;
+        scatterTarget = new Positions(6, 25);
         scatterPos = new Positions[18] {
             new Positions(1, 29),
             new Positions(1, 28),

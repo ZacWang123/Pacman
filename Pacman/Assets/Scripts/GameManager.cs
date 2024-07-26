@@ -17,7 +17,13 @@ public class GameManager : MonoBehaviour
     public Ghost3 ghost3;
     public Ghost4 ghost4;
     public float time;
-    public float updateInterval = 0.5f;
+    public float updateInterval = 0.1f;
+
+    string[] phases = new string[8] { "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase"};
+    int[] phaseDuration = new int[8] { 7, 20, 7, 20, 5, 20, 5, 999};
+    string currentPhase = "";
+
+/*    int[] ghostSpawnTime = new int[4] { 1, 1000, 1000, 1000};*/
 
     void Start()
     {
@@ -103,40 +109,38 @@ public class GameManager : MonoBehaviour
 
     IEnumerator GameLoop()
     {
-        string[] phases = new string[8] { "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase", };
-        int[] duration = new int[8] { 1000, 20, 7, 20, 5, 20, 5, 999 };
-        /*int[] duration = new int[8] { 7, 20, 7, 20, 5, 20, 5, 999 };*/
-
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 4; j++)
             {
                 ghosts[j].mode = phases[i];
+                currentPhase = phases[i];
             }
-            yield return new WaitForSeconds(duration[i]);
+            yield return new WaitForSeconds(phaseDuration[i]);
         }
     }
 
     public void GhostMovement()
     {
+        if (currentPhase == "Scatter") {
+            int scatterLength = ghost2.scatterPos.Length;
+            for (int i = 0; i < scatterLength; i++) {
+                if (ghost2.ghostPosition.Row == ghost2.scatterPos[i].Row && ghost2.ghostPosition.Col == ghost2.scatterPos[i].Col) {
+                    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
+                    ghost2.ghostPosition.Row = ghost2.scatterPos[(i + 1) % scatterLength].Row;
+                    ghost2.ghostPosition.Col = ghost2.scatterPos[(i + 1) % scatterLength].Col;
+                    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
+                    return;
+                }
+            }
+        }
+
         Dictionary<string, Positions> neighbors = NeighboringCells(ghost2.ghostPosition, ghost2.direction);
         Positions bestNeighbor = BestNeighbor(neighbors);
         grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
         ghost2.ghostPosition.Row = bestNeighbor.Row;
         ghost2.ghostPosition.Col = bestNeighbor.Col;
         grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
-        /*Positions[] nextGhostMove = ghost2.NextPosition(pacman.pacmanPosition);
-
-        for (int i = 0; i < nextGhostMove.Length; i++)
-        {
-            if (grid.WithinGrid(nextGhostMove[i].Row, nextGhostMove[i].Col))
-            {
-                grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
-                ghost2.ghostPosition = new Positions(nextGhostMove[i].Row, nextGhostMove[i].Col);
-                grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
-                break;
-            }
-        }*/
     }
 
     public Positions BestNeighbor(Dictionary<string, Positions> neighbors) {
@@ -145,7 +149,18 @@ public class GameManager : MonoBehaviour
         string direction = "";
 
         foreach (KeyValuePair<string, Positions> keyValue in neighbors) {
-            double newDistance = Math.Sqrt(Math.Pow(keyValue.Value.Row - pacman.pacmanPosition.Row, 2) + Math.Pow(keyValue.Value.Col - pacman.pacmanPosition.Col, 2));
+            Positions target = new Positions(0, 0);
+            if (currentPhase == "Scatter")
+            {
+                target.Row = ghost2.scatterTarget.Row;
+                target.Col = ghost2.scatterTarget.Col;
+            }
+            else if (currentPhase == "Chase") {
+                target.Row = pacman.pacmanPosition.Row;
+                target.Col = pacman.pacmanPosition.Col;
+            }
+            double newDistance = Math.Sqrt(Math.Pow(keyValue.Value.Row - target.Row, 2) + Math.Pow(keyValue.Value.Col - target.Col, 2));
+
             if (newDistance < distance) {
                 distance = newDistance;
                 bestNeighbor.Row = keyValue.Value.Row;

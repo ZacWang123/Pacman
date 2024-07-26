@@ -9,5 +9,6 @@ public class Ghost3 : Ghost
         ghostPosition = new Positions(13, 16);
         Id = 6;
         direction = "up";
+        exited = false;
     }
 }

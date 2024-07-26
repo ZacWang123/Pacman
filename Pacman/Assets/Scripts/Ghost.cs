@@ -8,4 +8,6 @@ public abstract class Ghost
     public int Id;
     public string mode;
     public string direction;
+    public Positions scatterTarget;
+    public bool exited;
 }
