@@ -10,5 +10,6 @@ public abstract class Ghost
     public string mode;
     public string direction;
     public Positions scatterTarget;
-    public bool exited;
+    public bool exited = false;
+    public int currentCellValue;
 }

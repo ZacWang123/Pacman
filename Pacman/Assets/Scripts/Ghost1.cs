@@ -9,7 +9,7 @@ public class Ghost1 : Ghost
         ghostPosition = new Positions(13, 19);
         Id = 4;
         direction = "up";
-        exited = false;
+        exited = true;
         scatterTarget = new Positions(21, 25);
         scatterPos = new Positions[18] {
             new Positions(21, 29),

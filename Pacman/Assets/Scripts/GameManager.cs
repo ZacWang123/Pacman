@@ -124,6 +124,7 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < 2; i++)
         {
+            bool inScatter = false;
             if (currentPhase == "Scatter")
             {
                 int scatterLength = ghosts[i].scatterPos.Length;
@@ -131,21 +132,26 @@ public class GameManager : MonoBehaviour
                 {
                     if (ghosts[i].ghostPosition.Row == ghosts[i].scatterPos[j].Row && ghosts[i].ghostPosition.Col == ghosts[i].scatterPos[j].Col)
                     {
-                        grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, 0);
+                        grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].currentCellValue);
                         ghosts[i].ghostPosition.Row = ghosts[i].scatterPos[(j + 1) % scatterLength].Row;
                         ghosts[i].ghostPosition.Col = ghosts[i].scatterPos[(j + 1) % scatterLength].Col;
+                        ghosts[i].currentCellValue = grid.GetGridCell(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col);
                         grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
-                        return;
+                        inScatter = true;
+                        break;
                     }
                 }
-            }
 
-            Dictionary<string, Positions> neighbors = NeighboringCells(ghosts[i].ghostPosition, ghosts[i].direction);
-            Positions bestNeighbor = BestNeighbor(neighbors, i);
-            grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, 0);
-            ghosts[i].ghostPosition.Row = bestNeighbor.Row;
-            ghosts[i].ghostPosition.Col = bestNeighbor.Col;
-            grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
+                if (!inScatter) {
+                    Dictionary<string, Positions> neighbors = NeighboringCells(ghosts[i].ghostPosition, ghosts[i].direction);
+                    Positions bestNeighbor = BestNeighbor(neighbors, i);
+                    grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].currentCellValue);
+                    ghosts[i].ghostPosition.Row = bestNeighbor.Row;
+                    ghosts[i].ghostPosition.Col = bestNeighbor.Col;
+                    ghosts[i].currentCellValue = grid.GetGridCell(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col);
+                    grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
+                }
+            }
         }
     }
     public Positions BestNeighbor(Dictionary<string, Positions> neighbors, int ghostNum)
@@ -157,7 +163,20 @@ public class GameManager : MonoBehaviour
         foreach (KeyValuePair<string, Positions> keyValue in neighbors)
         {
             Positions target = new Positions(0, 0);
-            if (currentPhase == "Scatter")
+            if (ghosts[ghostNum].exited && grid.GetGridCell(keyValue.Value.Row, keyValue.Value.Col) == 2) {
+                continue;
+            }
+
+            if (ghosts[ghostNum].exited == false) {
+                target.Row = 12;
+                target.Col = 19;
+                if (ghosts[ghostNum].ghostPosition.Row == 12 && ghosts[ghostNum].ghostPosition.Col == 19) {
+                    ghosts[ghostNum].exited = true;
+                    target.Row = ghosts[ghostNum].scatterTarget.Row;
+                    target.Col = ghosts[ghostNum].scatterTarget.Col;
+                }
+            }
+            else if (currentPhase == "Scatter")
             {
                 target.Row = ghosts[ghostNum].scatterTarget.Row;
                 target.Col = ghosts[ghostNum].scatterTarget.Col;
@@ -179,6 +198,41 @@ public class GameManager : MonoBehaviour
         }
         ghosts[ghostNum].direction = direction;
         return bestNeighbor;
+    }
+
+    public Dictionary<string, Positions> NeighboringCells(Positions currentCell, string direction)
+    {
+        Dictionary<string, Positions> neighbors = new Dictionary<string, Positions>();
+        if (direction != "up")
+        {
+            if (grid.WithinGrid(currentCell.Row, currentCell.Col - 1) && grid.GetGridCell(currentCell.Row, currentCell.Col - 1) != 1)
+            {
+                neighbors.Add("down", new Positions(currentCell.Row, currentCell.Col - 1));
+            }
+        }
+        if (direction != "down")
+        {
+            if (grid.WithinGrid(currentCell.Row, currentCell.Col + 1) && grid.GetGridCell(currentCell.Row, currentCell.Col + 1) != 1)
+            {
+                neighbors.Add("up", new Positions(currentCell.Row, currentCell.Col + 1));
+            }
+        }
+        if (direction != "left")
+        {
+            if (grid.WithinGrid(currentCell.Row + 1, currentCell.Col) && grid.GetGridCell(currentCell.Row + 1, currentCell.Col) != 1)
+            {
+                neighbors.Add("right", new Positions(currentCell.Row + 1, currentCell.Col));
+            }
+        }
+        if (direction != "right")
+        {
+            if (grid.WithinGrid(currentCell.Row - 1, currentCell.Col) && grid.GetGridCell(currentCell.Row - 1, currentCell.Col) != 1)
+            {
+                neighbors.Add("left", new Positions(currentCell.Row - 1, currentCell.Col));
+            }
+        }
+
+        return neighbors;
     }
 
     /*if (currentPhase == "Scatter") {
@@ -232,33 +286,6 @@ public class GameManager : MonoBehaviour
         ghost2.direction = direction;
         return bestNeighbor;
     }*/
-
-    public Dictionary<string, Positions> NeighboringCells(Positions currentCell, string direction)
-    {
-        Dictionary<string, Positions> neighbors = new Dictionary<string, Positions>();
-        if (direction != "up") {
-            if (grid.WithinGrid(currentCell.Row, currentCell.Col - 1) && grid.GetGridCell(currentCell.Row, currentCell.Col - 1) != 1) {
-                neighbors.Add("down", new Positions(currentCell.Row, currentCell.Col - 1));
-            }
-        }
-        if (direction != "down") {
-            if (grid.WithinGrid(currentCell.Row, currentCell.Col + 1) && grid.GetGridCell(currentCell.Row, currentCell.Col + 1) != 1) {
-                    neighbors.Add("up", new Positions(currentCell.Row, currentCell.Col + 1));
-            }
-        }
-        if (direction != "left") {
-            if (grid.WithinGrid(currentCell.Row + 1, currentCell.Col) && grid.GetGridCell(currentCell.Row + 1, currentCell.Col) != 1) {
-                neighbors.Add("right", new Positions(currentCell.Row + 1, currentCell.Col));
-            }
-        }
-        if (direction != "right") {
-            if (grid.WithinGrid(currentCell.Row - 1, currentCell.Col) && grid.GetGridCell(currentCell.Row - 1, currentCell.Col) != 1) {
-                neighbors.Add("left", new Positions(currentCell.Row - 1, currentCell.Col));
-            }
-        }
-
-        return neighbors;
-    }
 
     void Update()
     {
