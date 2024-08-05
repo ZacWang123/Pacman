@@ -12,4 +12,5 @@ public abstract class Ghost
     public Positions scatterTarget;
     public bool exited = false;
     public int currentCellValue;
+    public bool active = false;
 }
