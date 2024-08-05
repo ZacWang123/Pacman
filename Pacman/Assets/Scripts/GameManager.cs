@@ -132,11 +132,7 @@ public class GameManager : MonoBehaviour
                 {
                     if (ghosts[i].ghostPosition.Row == ghosts[i].scatterPos[j].Row && ghosts[i].ghostPosition.Col == ghosts[i].scatterPos[j].Col)
                     {
-                        grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].currentCellValue);
-                        ghosts[i].ghostPosition.Row = ghosts[i].scatterPos[(j + 1) % scatterLength].Row;
-                        ghosts[i].ghostPosition.Col = ghosts[i].scatterPos[(j + 1) % scatterLength].Col;
-                        ghosts[i].currentCellValue = grid.GetGridCell(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col);
-                        grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
+                        UpdateGhost(ghosts[i].scatterPos[(j + 1) % scatterLength].Row, ghosts[i].scatterPos[(j + 1) % scatterLength].Col, i);
                         inScatter = true;
                         break;
                     }
@@ -145,15 +141,20 @@ public class GameManager : MonoBehaviour
                 if (!inScatter) {
                     Dictionary<string, Positions> neighbors = NeighboringCells(ghosts[i].ghostPosition, ghosts[i].direction);
                     Positions bestNeighbor = BestNeighbor(neighbors, i);
-                    grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].currentCellValue);
-                    ghosts[i].ghostPosition.Row = bestNeighbor.Row;
-                    ghosts[i].ghostPosition.Col = bestNeighbor.Col;
-                    ghosts[i].currentCellValue = grid.GetGridCell(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col);
-                    grid.UpdateGrid(ghosts[i].ghostPosition.Row, ghosts[i].ghostPosition.Col, ghosts[i].Id);
+                    UpdateGhost(bestNeighbor.Row, bestNeighbor.Col, i);
                 }
             }
         }
     }
+
+    public void UpdateGhost(int row, int col, int ghostNum) {
+        grid.UpdateGrid(ghosts[ghostNum].ghostPosition.Row, ghosts[ghostNum].ghostPosition.Col, ghosts[ghostNum].currentCellValue);
+        ghosts[ghostNum].ghostPosition.Row = row;
+        ghosts[ghostNum].ghostPosition.Col = col;
+        ghosts[ghostNum].currentCellValue = grid.GetGridCell(ghosts[ghostNum].ghostPosition.Row, ghosts[ghostNum].ghostPosition.Col);
+        grid.UpdateGrid(ghosts[ghostNum].ghostPosition.Row, ghosts[ghostNum].ghostPosition.Col, ghosts[ghostNum].Id);
+    }
+
     public Positions BestNeighbor(Dictionary<string, Positions> neighbors, int ghostNum)
     {
         Positions bestNeighbor = new Positions(0, 0);
