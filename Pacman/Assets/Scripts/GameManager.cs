@@ -133,7 +133,7 @@ public class GameManager : MonoBehaviour
 
     public void GhostMovement()
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
             if (!ghosts[i].active) {
                 continue;
@@ -222,20 +222,6 @@ public class GameManager : MonoBehaviour
             validCells.Add(2);
         }
 
-        if (direction != "up")
-        {
-            if (grid.WithinGrid(currentCell.Row, currentCell.Col - 1) && validCells.Contains(grid.GetGridCell(currentCell.Row, currentCell.Col - 1)))
-            {
-                neighbors.Add("down", new Positions(currentCell.Row, currentCell.Col - 1));
-            }
-        }
-        if (direction != "down")
-        {
-            if (grid.WithinGrid(currentCell.Row, currentCell.Col + 1) && validCells.Contains(grid.GetGridCell(currentCell.Row, currentCell.Col + 1)))
-            {
-                neighbors.Add("up", new Positions(currentCell.Row, currentCell.Col + 1));
-            }
-        }
         if (direction != "left")
         {
             if (grid.WithinGrid(currentCell.Row + 1, currentCell.Col) && validCells.Contains(grid.GetGridCell(currentCell.Row + 1, currentCell.Col)))
@@ -251,61 +237,23 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        if (direction != "up")
+        {
+            if (grid.WithinGrid(currentCell.Row, currentCell.Col - 1) && validCells.Contains(grid.GetGridCell(currentCell.Row, currentCell.Col - 1)))
+            {
+                neighbors.Add("down", new Positions(currentCell.Row, currentCell.Col - 1));
+            }
+        }
+        if (direction != "down")
+        {
+            if (grid.WithinGrid(currentCell.Row, currentCell.Col + 1) && validCells.Contains(grid.GetGridCell(currentCell.Row, currentCell.Col + 1)))
+            {
+                neighbors.Add("up", new Positions(currentCell.Row, currentCell.Col + 1));
+            }
+        }
+
         return neighbors;
     }
-
-    /*if (currentPhase == "Scatter") {
-        int scatterLength = ghost2.scatterPos.Length;
-        for (int i = 0; i < scatterLength; i++) {
-            if (ghost2.ghostPosition.Row == ghost2.scatterPos[i].Row && ghost2.ghostPosition.Col == ghost2.scatterPos[i].Col) {
-                grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
-                ghost2.ghostPosition.Row = ghost2.scatterPos[(i + 1) % scatterLength].Row;
-                ghost2.ghostPosition.Col = ghost2.scatterPos[(i + 1) % scatterLength].Col;
-                grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);
-                return;
-            }
-        }
-    }
-
-    Dictionary<string, Positions> neighbors = NeighboringCells(ghost2.ghostPosition, ghost2.direction);
-    Positions bestNeighbor = BestNeighbor(neighbors);
-    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, 0);
-    ghost2.ghostPosition.Row = bestNeighbor.Row;
-    ghost2.ghostPosition.Col = bestNeighbor.Col;
-    grid.UpdateGrid(ghost2.ghostPosition.Row, ghost2.ghostPosition.Col, ghost2.Id);*/
-    /*public Positions BestNeighbor(Dictionary<string, Positions> neighbors, int ghostNum)
-    {
-        Positions bestNeighbor = new Positions(0, 0);
-        double distance = 100000.0;
-        string direction = "";
-
-        foreach (KeyValuePair<string, Positions> keyValue in neighbors)
-        {
-            Positions target = new Positions(0, 0);
-            if (currentPhase == "Scatter")
-            {
-                target.Row = ghost2.scatterTarget.Row;
-                target.Col = ghost2.scatterTarget.Col;
-            }
-            else if (currentPhase == "Chase")
-            {
-                target.Row = pacman.pacmanPosition.Row;
-                target.Col = pacman.pacmanPosition.Col;
-            }
-            double newDistance = Math.Sqrt(Math.Pow(keyValue.Value.Row - target.Row, 2) + Math.Pow(keyValue.Value.Col - target.Col, 2));
-
-            if (newDistance < distance)
-            {
-                distance = newDistance;
-                bestNeighbor.Row = keyValue.Value.Row;
-                bestNeighbor.Col = keyValue.Value.Col;
-                direction = keyValue.Key;
-            }
-        }
-        ghost2.direction = direction;
-        return bestNeighbor;
-    }*/
-
     void Update()
     {
         time += Time.deltaTime;
