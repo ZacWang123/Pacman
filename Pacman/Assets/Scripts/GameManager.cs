@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     public float updateInterval = 1f;
 
     string[] phases = new string[8] { "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase", "Scatter", "Chase"};
-    int[] phaseDuration = new int[8] { 100, 20, 7, 20, 5, 20, 5, 999};
+    int[] phaseDuration = new int[8] { 20, 200, 7, 20, 5, 20, 5, 999};
     string currentPhase = "";
 
 /*    int[] ghostSpawnTime = new int[4] { 1, 1000, 1000, 1000};*/
@@ -119,6 +119,7 @@ public class GameManager : MonoBehaviour
                 ghosts[j].mode = phases[i];
                 currentPhase = phases[i];
             }
+            print(phases[i]);
             yield return new WaitForSeconds(phaseDuration[i]);
         }
     }
@@ -157,12 +158,17 @@ public class GameManager : MonoBehaviour
                     if (ghosts[i].ghostPosition.Row == 12 && ghosts[i].ghostPosition.Col == 19)
                     {
                         ghosts[i].exited = true;
-                        print(i + " : " + ghosts[i].exited);
                     }
                     Dictionary<string, Positions> neighbors = NeighboringCells(ghosts[i].ghostPosition, ghosts[i].direction, i);
                     Positions bestNeighbor = BestNeighbor(neighbors, i);
                     UpdateGhost(bestNeighbor.Row, bestNeighbor.Col, i);
                 }
+            }
+
+            else if (currentPhase == "Chase") {
+                Dictionary<string, Positions> neighbors = NeighboringCells(ghosts[i].ghostPosition, ghosts[i].direction, i);
+                Positions bestNeighbor = BestNeighbor(neighbors, i);
+                UpdateGhost(bestNeighbor.Row, bestNeighbor.Col, i);
             }
         }
     }
